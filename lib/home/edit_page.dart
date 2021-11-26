@@ -41,7 +41,7 @@ class _EditPageState extends State<EditPage> {
   Widget _buildBody() {
     return Padding(
       padding: const EdgeInsets.all(40.0),
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
