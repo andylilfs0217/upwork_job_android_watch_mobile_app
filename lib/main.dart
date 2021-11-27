@@ -19,13 +19,34 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.landscapeRight,
     ]);
     return MaterialApp(
-        title: 'Android Watch App',
-        theme: ThemeData(primarySwatch: Colors.blue),
-        debugShowCheckedModeBanner: false,
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const HomePage(),
-          '/edit': (context) => const EditPage(),
-        });
+      title: 'Android Watch App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+            if (settings.arguments != null) {
+              final args = settings.arguments as HomePageArguments;
+              return MaterialPageRoute(
+                  builder: (context) => HomePage(
+                      age: args.age,
+                      fitnessLevel: args.fitnessLevel,
+                      sex: args.sex));
+            } else {
+              return MaterialPageRoute(builder: (context) => HomePage());
+            }
+          case '/edit':
+            final args = settings.arguments as EditPageArguments;
+            return MaterialPageRoute(
+                builder: (context) => EditPage(
+                    age: args.age,
+                    fitnessLevel: args.fitnessLevel,
+                    sex: args.sex));
+          default:
+            break;
+        }
+      },
+    );
   }
 }

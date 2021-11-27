@@ -25,7 +25,15 @@ class HomePageArguments {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final num age;
+  final num fitnessLevel;
+  final SexType sex;
+  const HomePage(
+      {Key? key,
+      this.age = 20,
+      this.fitnessLevel = 0.5,
+      this.sex = SexType.male})
+      : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -33,32 +41,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // Data
-  num age = 20;
-  num fitnessLevel = 0.5;
-  SexType sex = SexType.male;
   num heartRate = 65;
 
   num getAnaerobicThreshold() {
-    num adjustedAge = age;
-    if (sex == SexType.female) {
+    num adjustedAge = widget.age;
+    if (widget.sex == SexType.female) {
       adjustedAge *= 0.88;
     }
-    num at = (220 - adjustedAge) * fitnessLevel;
+    num at = (220 - adjustedAge) * widget.fitnessLevel;
     return at;
   }
 
   @override
   Widget build(BuildContext context) {
-    HomePageArguments? args;
-    if (ModalRoute.of(context)!.settings.arguments != null) {
-      args = ModalRoute.of(context)!.settings.arguments as HomePageArguments;
-      age = args.age;
-      fitnessLevel = args.fitnessLevel;
-      sex = args.sex;
-    } else {
-      // TODO: Get data from database
-    }
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(40.0),
@@ -70,15 +65,16 @@ class _HomePageState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text('Age: $age', style: const TextStyle(fontSize: 30)),
-                    Text('Fitness Level: $fitnessLevel',
+                    Text('Age: ${widget.age}',
+                        style: const TextStyle(fontSize: 30)),
+                    Text('Fitness Level: ${widget.fitnessLevel}',
                         style: const TextStyle(fontSize: 30))
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text('Sex: ${sex.sex}',
+                    Text('Sex: ${widget.sex.sex}',
                         style: const TextStyle(fontSize: 30)),
                     const Text('Fit = 1, Unfit = 0.5',
                         style: TextStyle(fontSize: 30))
@@ -90,7 +86,8 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     // Edit information
                     Navigator.pushNamed(context, '/edit',
-                        arguments: EditPageArguments(age, fitnessLevel, sex));
+                        arguments: EditPageArguments(
+                            widget.age, widget.fitnessLevel, widget.sex));
                   },
                 ))
               ],

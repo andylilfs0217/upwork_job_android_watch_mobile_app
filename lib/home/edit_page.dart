@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'home_page.dart';
 
@@ -9,28 +10,31 @@ class EditPageArguments {
   EditPageArguments(this.age, this.fitnessLevel, this.sex);
 }
 
+// ignore: must_be_immutable
 class EditPage extends StatefulWidget {
-  const EditPage({Key? key}) : super(key: key);
+  num age;
+  num fitnessLevel;
+  SexType sex;
+  EditPage(
+      {Key? key,
+      required this.age,
+      required this.fitnessLevel,
+      required this.sex})
+      : super(key: key);
 
   @override
   _EditPageState createState() => _EditPageState();
 }
 
 class _EditPageState extends State<EditPage> {
-  late num age;
-  late num fitnessLevel;
-  late SexType sex;
+  TextEditingController ageController = TextEditingController();
 
   final fitnessLevelList = <num>[0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
   final sexList = ['M', 'F'];
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as EditPageArguments;
-    age = args.age;
-    fitnessLevel = args.fitnessLevel;
-    sex = args.sex;
+    ageController.text = widget.age.toString();
 
     return Scaffold(
         extendBodyBehindAppBar: true,
@@ -47,98 +51,112 @@ class _EditPageState extends State<EditPage> {
       padding: const EdgeInsets.all(40.0),
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                    flex: 5,
-                    child: const Text('Age', style: TextStyle(fontSize: 30))),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: Text('Fitness Level',
-                      style: const TextStyle(fontSize: 30)),
-                ),
-                DropdownButton<num>(
-                  isExpanded: false,
-                  value: fitnessLevel,
-                  icon: const Icon(Icons.arrow_downward),
-                  iconSize: 24,
-                  elevation: 16,
-                  underline: Container(
-                    height: 2,
-                    color: Colors.deepPurpleAccent,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 5,
+                      child: Text('Age', style: TextStyle(fontSize: 30))),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ], // Only numbers can be entered
+                      controller: ageController,
+                    ),
                   ),
-                  onChanged: (num? newValue) {
-                    setState(() {
-                      if (newValue != null) {
-                        fitnessLevel = newValue;
-                      }
-                    });
-                  },
-                  items:
-                      fitnessLevelList.map<DropdownMenuItem<num>>((num value) {
-                    return DropdownMenuItem<num>(
-                      value: value,
-                      child: Text(value.toString(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 20)),
-                    );
-                  }).toList(),
-                )
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
                     flex: 5,
-                    child: Text('Sex ${sex.sex}',
-                        style: const TextStyle(fontSize: 30))),
-                DropdownButton<String>(
-                  isExpanded: false,
-                  value: sex.sex,
-                  icon: const Icon(Icons.arrow_downward),
-                  iconSize: 24,
-                  elevation: 16,
-                  underline: Container(
-                    height: 2,
-                    color: Colors.deepPurpleAccent,
+                    child:
+                        Text('Fitness Level', style: TextStyle(fontSize: 30)),
                   ),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      if (newValue != null) {
-                        if (newValue == 'M') {
-                          sex = SexType.male;
-                        } else {
-                          sex = SexType.female;
+                  DropdownButton<num>(
+                    isExpanded: false,
+                    value: widget.fitnessLevel,
+                    icon: const Icon(Icons.arrow_downward),
+                    iconSize: 24,
+                    elevation: 16,
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (num? newValue) {
+                      setState(() {
+                        if (newValue != null) {
+                          widget.fitnessLevel = newValue;
                         }
-                      }
-                    });
+                      });
+                    },
+                    items: fitnessLevelList
+                        .map<DropdownMenuItem<num>>((num value) {
+                      return DropdownMenuItem<num>(
+                        value: value,
+                        child: Text(value.toString(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 20)),
+                      );
+                    }).toList(),
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  const Expanded(
+                      flex: 5,
+                      child: Text('Sex', style: TextStyle(fontSize: 30))),
+                  DropdownButton<String>(
+                    isExpanded: false,
+                    value: widget.sex.sex,
+                    icon: const Icon(Icons.arrow_downward),
+                    iconSize: 24,
+                    elevation: 16,
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        if (newValue != null) {
+                          if (newValue == 'M') {
+                            widget.sex = SexType.male;
+                          } else {
+                            widget.sex = SexType.female;
+                          }
+                        }
+                      });
+                    },
+                    items:
+                        sexList.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 20)),
+                      );
+                    }).toList(),
+                  )
+                ],
+              ),
+              TextButton(
+                  onPressed: () {
+                    widget.age = int.parse(ageController.text);
+                    Navigator.pushNamed(context, '/',
+                        arguments: HomePageArguments(
+                            widget.age, widget.fitnessLevel, widget.sex));
                   },
-                  items: sexList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 20)),
-                    );
-                  }).toList(),
-                )
-              ],
-            ),
-            TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/',
-                      arguments: HomePageArguments(age, fitnessLevel, sex));
-                },
-                child: const Text('Save', style: TextStyle(fontSize: 30)))
-          ],
+                  child: const Text('Save', style: TextStyle(fontSize: 30)))
+            ],
+          ),
         ),
       ),
     );
