@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 import 'edit_page.dart';
@@ -40,7 +41,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Firebase realtime database
+  final database = FirebaseDatabase.instance.reference();
+
   // Data
+  // TODO: fetching heartrate
   num heartRate = 65;
 
   num getAnaerobicThreshold() {
@@ -54,6 +59,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final healthRef = database.child('/health');
+    healthRef.set({
+      'age': widget.age,
+      'fitnessLevel': widget.fitnessLevel,
+      'sex': widget.sex,
+      'heartRate': heartRate
+    });
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(40.0),
