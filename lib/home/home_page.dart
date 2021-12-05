@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:device_info/device_info.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:upwork_job_android_watch_mobile_app/utils/loading_page.dart';
 
 import 'edit_page.dart';
 
@@ -42,6 +47,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  String? identifier;
   // Firebase realtime database
   final database = FirebaseDatabase.instance.reference();
 
@@ -58,9 +65,35 @@ class _HomePageState extends State<HomePage> {
     return at;
   }
 
+  Future<void> getDeviceDetails() async {
+    try {
+      if (Platform.isAndroid) {
+        var build = await deviceInfoPlugin.androidInfo;
+        identifier = build.androidId; //UUID for Android
+      } else if (Platform.isIOS) {
+        var data = await deviceInfoPlugin.iosInfo;
+        identifier = data.identifierForVendor; //UUID for iOS
+      }
+    } on PlatformException {
+      print('Failed to get platform version');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getDeviceDetails().then((value) {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final healthRef = database.child('/health_data');
+    if (identifier == null) {
+      return const LoadingPage();
+    }
+
+    final healthRef = database.child('health_data_$identifier');
     final _future = healthRef.once();
 
     return Scaffold(
@@ -69,17 +102,25 @@ class _HomePageState extends State<HomePage> {
           builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               var value = snapshot.data.value;
-              widget.age = value['age'];
-              widget.fitnessLevel = value['fitnessLevel'];
-              switch (value['sex']) {
-                case 'M':
-                  widget.sex = SexType.male;
-                  break;
-                case 'F':
-                  widget.sex = SexType.female;
-                  break;
-                default:
-                  break;
+              if (value != null) {
+                widget.age = value['age'];
+                widget.fitnessLevel = value['fitnessLevel'];
+                switch (value['sex']) {
+                  case 'M':
+                    widget.sex = SexType.male;
+                    break;
+                  case 'F':
+                    widget.sex = SexType.female;
+                    break;
+                  default:
+                    break;
+                }
+              } else {
+                healthRef.update({
+                  'age': widget.age,
+                  'fitnessLevel': widget.fitnessLevel,
+                  'sex': widget.sex.sex,
+                });
               }
               return Padding(
                 padding: const EdgeInsets.all(40.0),

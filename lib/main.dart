@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'home/edit_page.dart';
 import 'home/home_page.dart';
 import 'utils/error_page.dart';
 import 'utils/loading_page.dart';

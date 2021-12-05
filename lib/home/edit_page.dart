@@ -40,7 +40,6 @@ class _EditPageState extends State<EditPage> {
     ageController.text = widget.age.toString();
 
     return Scaffold(
-        // extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
