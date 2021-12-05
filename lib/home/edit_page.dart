@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,6 +28,8 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
+  // Firebase realtime database
+  final database = FirebaseDatabase.instance.reference();
   TextEditingController ageController = TextEditingController();
 
   final fitnessLevelList = <num>[0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
@@ -37,7 +40,7 @@ class _EditPageState extends State<EditPage> {
     ageController.text = widget.age.toString();
 
     return Scaffold(
-        extendBodyBehindAppBar: true,
+        // extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -47,6 +50,7 @@ class _EditPageState extends State<EditPage> {
   }
 
   Widget _buildBody() {
+    final healthRef = database.child('/health_data');
     return Padding(
       padding: const EdgeInsets.all(40.0),
       child: SizedBox(
@@ -150,9 +154,21 @@ class _EditPageState extends State<EditPage> {
               TextButton(
                   onPressed: () {
                     widget.age = int.parse(ageController.text);
-                    Navigator.pushNamed(context, '/',
-                        arguments: HomePageArguments(
-                            widget.age, widget.fitnessLevel, widget.sex));
+                    // Update data to firebase
+                    healthRef.update({
+                      'age': widget.age,
+                      'fitnessLevel': widget.fitnessLevel,
+                      'sex': widget.sex.sex,
+                    });
+                    // Go to home page
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HomePage(
+                                  age: widget.age,
+                                  fitnessLevel: widget.fitnessLevel,
+                                  sex: widget.sex,
+                                )));
                   },
                   child: const Text('Save', style: TextStyle(fontSize: 30)))
             ],

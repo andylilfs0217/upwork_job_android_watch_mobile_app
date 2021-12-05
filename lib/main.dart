@@ -7,7 +7,7 @@ import 'home/home_page.dart';
 import 'utils/error_page.dart';
 import 'utils/loading_page.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
@@ -20,10 +20,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  /// The future is part of the state of our widget. We should not call `initializeApp`
-  /// directly inside [build].
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
-
+  final Future<FirebaseApp> _fb = Firebase.initializeApp();
   @override
   Widget build(BuildContext context) {
     // Set landscape orientation
@@ -32,53 +29,19 @@ class _MyAppState extends State<MyApp> {
       DeviceOrientation.landscapeRight,
     ]);
     return FutureBuilder(
-        future: _initialization,
+        future: _fb,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasError) {
+            return const ErrorPage();
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
             return MaterialApp(
                 title: 'Android Watch App',
                 theme: ThemeData(primarySwatch: Colors.blue),
                 debugShowCheckedModeBanner: false,
-                home: const ErrorPage());
+                home: HomePage());
           }
-          if (snapshot.connectionState == ConnectionState.done) {
-            return MaterialApp(
-              title: 'Android Watch App',
-              theme: ThemeData(primarySwatch: Colors.blue),
-              debugShowCheckedModeBanner: false,
-              initialRoute: '/',
-              onGenerateRoute: (settings) {
-                switch (settings.name) {
-                  case '/':
-                    if (settings.arguments != null) {
-                      final args = settings.arguments as HomePageArguments;
-                      return MaterialPageRoute(
-                          builder: (context) => HomePage(
-                              age: args.age,
-                              fitnessLevel: args.fitnessLevel,
-                              sex: args.sex));
-                    } else {
-                      return MaterialPageRoute(
-                          builder: (context) => HomePage());
-                    }
-                  case '/edit':
-                    final args = settings.arguments as EditPageArguments;
-                    return MaterialPageRoute(
-                        builder: (context) => EditPage(
-                            age: args.age,
-                            fitnessLevel: args.fitnessLevel,
-                            sex: args.sex));
-                  default:
-                    break;
-                }
-              },
-            );
-          }
-          return MaterialApp(
-              title: 'Android Watch App',
-              theme: ThemeData(primarySwatch: Colors.blue),
-              debugShowCheckedModeBanner: false,
-              home: const LoadingPage());
+          return const MaterialApp(home: LoadingPage());
         });
   }
 }

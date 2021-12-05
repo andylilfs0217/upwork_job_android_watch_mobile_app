@@ -25,11 +25,12 @@ class HomePageArguments {
   HomePageArguments(this.age, this.fitnessLevel, this.sex);
 }
 
+// ignore: must_be_immutable
 class HomePage extends StatefulWidget {
-  final num age;
-  final num fitnessLevel;
-  final SexType sex;
-  const HomePage(
+  num age;
+  num fitnessLevel;
+  SexType sex;
+  HomePage(
       {Key? key,
       this.age = 20,
       this.fitnessLevel = 0.5,
@@ -59,63 +60,86 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final healthRef = database.child('/health');
-    healthRef.set({
-      'age': widget.age,
-      'fitnessLevel': widget.fitnessLevel,
-      'sex': widget.sex,
-      'heartRate': heartRate
-    });
+    final healthRef = database.child('/health_data');
+    final _future = healthRef.once();
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(40.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: FutureBuilder(
+          future: _future,
+          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              var value = snapshot.data.value;
+              widget.age = value['age'];
+              widget.fitnessLevel = value['fitnessLevel'];
+              switch (value['sex']) {
+                case 'M':
+                  widget.sex = SexType.male;
+                  break;
+                case 'F':
+                  widget.sex = SexType.female;
+                  break;
+                default:
+                  break;
+              }
+              return Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Age: ${widget.age}',
-                        style: const TextStyle(fontSize: 30)),
-                    Text('Fitness Level: ${widget.fitnessLevel}',
-                        style: const TextStyle(fontSize: 30))
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text('Age: ${widget.age}',
+                                style: const TextStyle(fontSize: 30)),
+                            Text('Fitness Level: ${widget.fitnessLevel}',
+                                style: const TextStyle(fontSize: 30))
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text('Sex: ${widget.sex.sex}',
+                                style: const TextStyle(fontSize: 30)),
+                            const Text('Fit = 1, Unfit = 0.5',
+                                style: TextStyle(fontSize: 30))
+                          ],
+                        ),
+                        Center(
+                            child: TextButton(
+                          child: const Text('Edit',
+                              style: TextStyle(fontSize: 30)),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditPage(
+                                    age: widget.age,
+                                    fitnessLevel: widget.fitnessLevel,
+                                    sex: widget.sex,
+                                  ),
+                                ));
+                          },
+                        ))
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text('Heart Rate: $heartRate',
+                            style: const TextStyle(fontSize: 40)),
+                        Text(
+                            'Anaerobic Threshold: ${getAnaerobicThreshold().toInt()}',
+                            style: const TextStyle(fontSize: 40)),
+                      ],
+                    ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text('Sex: ${widget.sex.sex}',
-                        style: const TextStyle(fontSize: 30)),
-                    const Text('Fit = 1, Unfit = 0.5',
-                        style: TextStyle(fontSize: 30))
-                  ],
-                ),
-                Center(
-                    child: TextButton(
-                  child: const Text('Edit', style: TextStyle(fontSize: 30)),
-                  onPressed: () {
-                    // Edit information
-                    Navigator.pushNamed(context, '/edit',
-                        arguments: EditPageArguments(
-                            widget.age, widget.fitnessLevel, widget.sex));
-                  },
-                ))
-              ],
-            ),
-            Column(
-              children: [
-                Text('Heart Rate: $heartRate',
-                    style: const TextStyle(fontSize: 40)),
-                Text('Anaerobic Threshold: ${getAnaerobicThreshold().toInt()}',
-                    style: const TextStyle(fontSize: 40)),
-              ],
-            ),
-          ],
-        ),
-      ),
+              );
+            } else {
+              return Container();
+            }
+          }),
     );
   }
 }
