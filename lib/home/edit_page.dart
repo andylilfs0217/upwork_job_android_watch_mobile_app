@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:device_info/device_info.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:upwork_job_android_watch_mobile_app/utils/loading_page.dart';
 
 import 'home_page.dart';
 
@@ -28,6 +32,8 @@ class EditPage extends StatefulWidget {
 }
 
 class _EditPageState extends State<EditPage> {
+  final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  String? identifier;
   // Firebase realtime database
   final database = FirebaseDatabase.instance.reference();
   TextEditingController ageController = TextEditingController();
@@ -37,8 +43,6 @@ class _EditPageState extends State<EditPage> {
 
   @override
   Widget build(BuildContext context) {
-    ageController.text = widget.age.toString();
-
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -48,8 +52,34 @@ class _EditPageState extends State<EditPage> {
         body: _buildBody());
   }
 
+  Future<void> getDeviceDetails() async {
+    try {
+      if (Platform.isAndroid) {
+        var build = await deviceInfoPlugin.androidInfo;
+        identifier = build.androidId; //UUID for Android
+      } else if (Platform.isIOS) {
+        var data = await deviceInfoPlugin.iosInfo;
+        identifier = data.identifierForVendor; //UUID for iOS
+      }
+    } on PlatformException {
+      print('Failed to get platform version');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ageController.text = widget.age.toString();
+    getDeviceDetails().then((value) {
+      setState(() {});
+    });
+  }
+
   Widget _buildBody() {
-    final healthRef = database.child('/health_data');
+    if (identifier == null) {
+      return const LoadingPage();
+    }
+    final healthRef = database.child('/health_data_$identifier');
     return Padding(
       padding: const EdgeInsets.all(40.0),
       child: SizedBox(
