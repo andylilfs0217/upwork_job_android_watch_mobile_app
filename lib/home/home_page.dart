@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:device_info/device_info.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:upwork_job_android_watch_mobile_app/utils/loading_page.dart';
 
 import 'edit_page.dart';
@@ -30,6 +33,14 @@ class HomePageArguments {
   HomePageArguments(this.age, this.fitnessLevel, this.sex);
 }
 
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    description:
+        'This channel is used for important notifications.', // description
+    importance: Importance.high,
+    playSound: true);
+
 // ignore: must_be_immutable
 class HomePage extends StatefulWidget {
   num age;
@@ -51,10 +62,14 @@ class _HomePageState extends State<HomePage> {
   String? identifier;
   // Firebase realtime database
   final database = FirebaseDatabase.instance.reference();
+  // Firebase notification
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   // Data
   // TODO: fetching heartrate
-  num heartRate = 65;
+  final ValueNotifier<num> heartRate = ValueNotifier<num>(135);
 
   num getAnaerobicThreshold() {
     num adjustedAge = widget.age;
@@ -82,9 +97,43 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channelDescription: channel.description,
+                color: Colors.blue,
+                playSound: true,
+                icon: '@mipmap/ic_launcher',
+              ),
+            ));
+      }
+    });
     getDeviceDetails().then((value) {
       setState(() {});
     });
+  }
+
+  void showNotification() {
+    flutterLocalNotificationsPlugin.show(
+        0,
+        "Be aware!",
+        "Your heart rate exceeds anaerobic threshold!",
+        NotificationDetails(
+            android: AndroidNotificationDetails(channel.id, channel.name,
+                channelDescription: channel.description,
+                importance: Importance.high,
+                color: Colors.blue,
+                playSound: true,
+                icon: '@mipmap/ic_launcher')));
   }
 
   @override
@@ -165,14 +214,24 @@ class _HomePageState extends State<HomePage> {
                         ))
                       ],
                     ),
-                    Column(
-                      children: [
-                        Text('Heart Rate: $heartRate',
-                            style: const TextStyle(fontSize: 40)),
-                        Text(
-                            'Anaerobic Threshold: ${getAnaerobicThreshold().toInt()}',
-                            style: const TextStyle(fontSize: 40)),
-                      ],
+                    ValueListenableBuilder<num>(
+                      valueListenable: heartRate,
+                      builder:
+                          (BuildContext context, num value, Widget? child) {
+                        // Send notification if heart rate exceeds the limit
+                        var at = getAnaerobicThreshold().toInt();
+                        if (value > at) {
+                          showNotification();
+                        }
+                        return Column(
+                          children: [
+                            Text('Heart Rate: $value',
+                                style: const TextStyle(fontSize: 40)),
+                            Text('Anaerobic Threshold: $at',
+                                style: const TextStyle(fontSize: 40)),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
