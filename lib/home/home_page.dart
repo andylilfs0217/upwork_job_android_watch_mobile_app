@@ -63,7 +63,6 @@ class _HomePageState extends State<HomePage> {
   // Firebase realtime database
   final database = FirebaseDatabase.instance.reference();
   // Firebase notification
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
