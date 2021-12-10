@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
 
   // Data
   // TODO: fetching heartrate
-  final ValueNotifier<num> heartRate = ValueNotifier<num>(135);
+  ValueNotifier<num> heartRate = ValueNotifier<num>(135);
 
   static const platform = MethodChannel('samples.flutter.dev/heartRate');
 
@@ -96,15 +96,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _getBatteryLevel() async {
-    String batteryLevel;
-    try {
-      final int result = await platform.invokeMethod('getHeartRate');
-      batteryLevel = 'Battery level at $result % .';
-    } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
-    }
-    print(batteryLevel);
+  Future<void> _getHeartRateLevel() async {
+    final int result = await platform.invokeMethod('getHeartRate');
+    print('Heart rate: $result');
+    heartRate = ValueNotifier<num>(result);
   }
 
   @override
@@ -130,6 +125,8 @@ class _HomePageState extends State<HomePage> {
             ));
       }
     });
+    // TODO
+    _getHeartRateLevel();
     getDeviceDetails().then((value) {
       setState(() {});
     });
@@ -214,8 +211,6 @@ class _HomePageState extends State<HomePage> {
                           child: const Text('Edit',
                               style: TextStyle(fontSize: 30)),
                           onPressed: () {
-                            // TODO
-                            _getBatteryLevel();
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
