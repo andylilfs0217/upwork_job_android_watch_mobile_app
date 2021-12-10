@@ -221,6 +221,15 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ));
                           },
+                        )),
+                        // TODO: Remove
+                        Center(
+                            child: TextButton(
+                          child: const Text('Update Heart Rate',
+                              style: TextStyle(fontSize: 30)),
+                          onPressed: () {
+                            _getHeartRateLevel();
+                          },
                         ))
                       ],
                     ),

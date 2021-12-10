@@ -31,6 +31,10 @@ public class MainActivity
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    init();
+  }
+
+  private void init() {
     sensorManager2 = (SensorManager) this.getSystemService(SENSOR_SERVICE);
     sensor2 = sensorManager2.getDefaultSensor(Sensor.TYPE_HEART_RATE);
     sensorManager2.registerListener(
