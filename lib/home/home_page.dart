@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:upwork_job_android_watch_mobile_app/utils/loading_page.dart';
+import 'dart:async';
 
 import 'edit_page.dart';
 
@@ -70,6 +71,8 @@ class _HomePageState extends State<HomePage> {
   // TODO: fetching heartrate
   final ValueNotifier<num> heartRate = ValueNotifier<num>(135);
 
+  static const platform = MethodChannel('samples.flutter.dev/battery');
+
   num getAnaerobicThreshold() {
     num adjustedAge = widget.age;
     if (widget.sex == SexType.female) {
@@ -91,6 +94,17 @@ class _HomePageState extends State<HomePage> {
     } on PlatformException {
       print('Failed to get platform version');
     }
+  }
+
+  Future<void> _getBatteryLevel() async {
+    String batteryLevel;
+    try {
+      final int result = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+    }
+    print(batteryLevel);
   }
 
   @override
@@ -200,6 +214,8 @@ class _HomePageState extends State<HomePage> {
                           child: const Text('Edit',
                               style: TextStyle(fontSize: 30)),
                           onPressed: () {
+                            // TODO
+                            _getBatteryLevel();
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
