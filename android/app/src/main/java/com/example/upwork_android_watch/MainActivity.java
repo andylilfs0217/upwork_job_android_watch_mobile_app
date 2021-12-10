@@ -11,10 +11,20 @@ import android.os.BatteryManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
 
 public class MainActivity extends FlutterActivity {
-  private static final String CHANNEL = "samples.flutter.dev/battery";
+  private static final String CHANNEL = "samples.flutter.dev/heartRate";
+
+  // Heart rate
+  private SensorManager sensorManager2;
+  public static float mems_data[] = new float[]{0, 0, 0, 0, 0};
+  private int heartRate;
+  Sensor sensor2;
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
@@ -23,11 +33,11 @@ public class MainActivity extends FlutterActivity {
         .setMethodCallHandler(
           (call, result) -> {
             // Note: this method is invoked on the main thread.
-            if (call.method.equals("getBatteryLevel")) {
-              int batteryLevel = getBatteryLevel();
+            if (call.method.equals("getHeartRate")) {
+              int heartRateLevel = getHeartRate();
 
-              if (batteryLevel != -1) {
-                result.success(batteryLevel);
+              if (heartRateLevel != -1) {
+                result.success(heartRateLevel);
               } else {
                 result.error("UNAVAILABLE", "Battery level not available.", null);
               }
@@ -39,19 +49,20 @@ public class MainActivity extends FlutterActivity {
         );
   }
 
-  private int getBatteryLevel() {
-    int batteryLevel = -1;
-    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-      BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
-      batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-    } else {
-      Intent intent = new ContextWrapper(getApplicationContext()).
-          registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-      batteryLevel = (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
-          intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-    }
+  private int getHeartRate() {
+    int heartRateLevel = 10;
+    // if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+    //   BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
+    //   heartRateLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+    // } else {
+    //   Intent intent = new ContextWrapper(getApplicationContext()).
+    //       registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    //   heartRateLevel = (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
+    //       intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+    // }
 
-    return batteryLevel;
+
+    return heartRateLevel;
   }
 
 }
