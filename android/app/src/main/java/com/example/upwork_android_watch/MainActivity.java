@@ -1,4 +1,4 @@
-package com.andylilfs0217.upwork_job_android_watch_mobile_app;
+package com.example.upwork_android_watch;
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;

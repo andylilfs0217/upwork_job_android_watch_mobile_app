@@ -1,10 +1,40 @@
 {
   "project_info": {
     "project_number": "497580094136",
+    "firebase_url": "https://android-watch-app-default-rtdb.firebaseio.com",
     "project_id": "android-watch-app",
     "storage_bucket": "android-watch-app.appspot.com"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497580094136:android:5365ac8cb3ee87b5a33a4d",
+        "android_client_info": {
+          "package_name": "com.andylilfs0217.upwork_android_watch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497580094136-8j6o38mhkrupgeg4rhkro4bch4lsa1gg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrLXAmrAdv-GgnR3FJIRzYuqt8uYpKgaI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497580094136-8j6o38mhkrupgeg4rhkro4bch4lsa1gg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:497580094136:android:4bf3715f5afdda70a33a4d",

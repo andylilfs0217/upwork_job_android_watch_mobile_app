@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:upwork_job_android_watch_mobile_app/utils/loading_page.dart';
+import 'package:upwork_android_watch/utils/loading_page.dart';
 import 'dart:async';
 
 import 'edit_page.dart';
